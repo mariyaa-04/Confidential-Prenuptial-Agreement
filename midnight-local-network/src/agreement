@@ -1,0 +1,156 @@
+// This file is part of midnightntwrk/confidential-prenup.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+
+pragma language_version >= 0.20;
+
+import CompactStandardLibrary;
+
+// --- PUBLIC STATE (visible on-chain) ---
+// Just the commitment hash - nothing private revealed!
+export ledger prenupCommitment: Hash;
+export ledger partyA: Address;
+export ledger partyB: Address;
+export ledger isActive: Boolean;
+export ledger marriageDate: Date;
+
+// --- PRIVATE STATE (hidden from public) ---
+// The actual clauses are stored privately
+export private ledger hiddenClauses: ClauseSet;
+
+// Custom type for storing clauses
+type Clause = struct {
+    clauseId: Uint64,
+    conditionType: ConditionType,
+    conditionData: Hash,      // Hash of the actual condition
+    action: Action,
+    isExecuted: Boolean
+};
+
+type ConditionType = enum {
+    TimeBased,
+    CourtVerified,
+    BothPartiesAgree
+};
+
+type Action = struct {
+    assetType: Asset,
+    fromParty: Address,
+    toParty: Address,
+    amount: Uint64
+};
+
+type ClauseSet = Map<Uint64, Clause>;
+
+// --- TRANSITION FUNCTIONS ---
+
+// 1. INITIALIZE PRENUP (like the counter example's simple function)
+// Couples register their prenuptial agreement
+export circuit createPrenup(
+    commitmentHash: Hash,
+    party1: Address,
+    party2: Address
+): [] {
+    // Store the commitment hash (hidden clauses are kept private)
+    prenupCommitment = commitmentHash;
+    partyA = party1;
+    partyB = party2;
+    isActive = true;
+    marriageDate = currentDate();
+    
+    // Initialize empty private clause set
+    hiddenClauses = emptyClauseSet();
+}
+
+// 2. ADD A HIDDEN CLAUSE (private data)
+// Couples add confidential terms
+export circuit addClause(
+    clauseId: Uint64,
+    conditionType: ConditionType,
+    conditionText: String,    // The actual hidden text
+    actionAsset: Asset,
+    actionTo: Address,
+    actionAmount: Uint64
+): [] {
+    // Create hash of the condition for verification
+    let conditionHash = hash(conditionText);
+    
+    // Store clause privately (not on public ledger!)
+    let newClause = Clause {
+        clauseId: clauseId,
+        conditionType: conditionType,
+        conditionData: conditionHash,
+        action: Action {
+            assetType: actionAsset,
+            fromParty: caller(),
+            toParty: actionTo,
+            amount: actionAmount
+        },
+        isExecuted: false
+    };
+    
+    hiddenClauses.insert(clauseId, newClause);
+}
+
+// 3. EXECUTE A CLAUSE (like increment() in counter example)
+// Trigger a prenup condition when met
+export circuit executeClause(clauseId: Uint64, proofData: String): [] {
+    // Get the private clause
+    let clause = hiddenClauses.get(clauseId);
+    
+    // Verify clause exists and not already executed
+    if clause.isExecuted {
+        return;
+    }
+    
+    // Verify condition is met based on type
+    let conditionMet = match clause.conditionType {
+        TimeBased => verifyTimeCondition(clause, proofData),
+        CourtVerified => verifyCourtSignature(proofData),
+        BothPartiesAgree => verifyBothSignatures(proofData)
+    };
+    
+    // If condition met, execute the action
+    if conditionMet {
+        // Transfer assets as per agreement
+        transfer(
+            clause.action.assetType,
+            clause.action.fromParty,
+            clause.action.toParty,
+            clause.action.amount
+        );
+        
+        // Mark as executed
+        clause.isExecuted = true;
+        hiddenClauses.update(clauseId, clause);
+    }
+}
+
+// 4. VERIFY TIME-BASED CONDITION
+export circuit verifyTimeCondition(clause: Clause, targetDate: Date): Bool {
+    return currentDate() >= targetDate;
+}
+
+// 5. VERIFY COURT SIGNATURE (simple oracle pattern)
+export circuit verifyCourtSignature(signedDocument: String): Bool {
+    // In a real app, you'd verify a court's cryptographic signature
+    // This is a simplified version for beginners
+    let expectedCourtPubKey = 0x1234...; // Known court/public oracle key
+    return verifySignature(signedDocument, expectedCourtPubKey);
+}
+
+// 6. VERIFY BOTH PARTIES AGREE
+export circuit verifyBothSignatures(agreement: String): Bool {
+    let sigA = extractSignature(agreement, partyA);
+    let sigB = extractSignature(agreement, partyB);
+    return sigA.valid && sigB.valid;
+}
+
+// 7. CANCEL PRENUP (both parties agree)
+export circuit cancelPrenup(agreementSignature: String): [] {
+    if verifyBothSignatures(agreementSignature) {
+        isActive = false;
+        // Return all funds to original owners
+        returnAllFunds();
+    }
+}
