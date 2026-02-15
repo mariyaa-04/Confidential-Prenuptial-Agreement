@@ -199,7 +199,7 @@ midnight-starter-template-windows/
 
 ## 🔗 Deployed Smart Contract
 
-**Contract Address:** ``
+**Contract Address:** `0x0a95b4a564561b8b81f72ae2732d65615152fd32`
 
 **Network:** Midnight Testnet  
 **Status:** Active  

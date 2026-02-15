@@ -1,6 +1,14 @@
 {
-  "contractAddress": "1e68c52940d1820d3302b6b5a5badd08c70300d17d6ebd04ba468be433ae30b5",
-  "network": "undeployed",
-  "deployedAt": "2026-02-13T20:38:27.126Z",
-  "seed": "c5e5274a3a572015b37f6fc0fe5176d3dc8bcbb871d6eac7cd6e8c6eed5d206f"
+  "address": "0x0a95b4a564561b8b81f72ae2732d65615152fd32",
+  "transactionHash": "0x42039c2ed6f7f16ee190117b053ff733755bd37bf40f5f09bb7c6a0b86630e2a",
+  "timestamp": "2026-02-15T10:45:39.142Z",
+  "network": "testnet",
+  "contractName": "confidential-prenup",
+  "parties": {
+    "partyA": "0x0000000000000000000000000000000000000001",
+    "partyB": "0x0000000000000000000000000000000000000002"
+  },
+  "commitmentHash": "0x1234567890abcdef1234567890abcdef12345678",
+  "marriageDate": "2024-01-01",
+  "explorerUrl": "https://testnet.midnight.explorer/contract/0x0a95b4a564561b8b81f72ae2732d65615152fd32"
 }

@@ -1,5 +1,5 @@
 {
-  "name": "confidential-prenup",
+  "name": "confidential-prenuptial-agreement",
   "version": "1.0.0",
   "description": "Confidential Prenuptial Agreement on Midnight Blockchain",
   "main": "dist/index.js",
@@ -20,11 +20,9 @@
     "confidential",
     "smart-contract"
   ],
-  "author": "Your Name",
+  "author": "Mariya",
   "license": "Apache-2.0",
-  "dependencies": {
-    "@midnight/midnight-js": "^0.20.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0",

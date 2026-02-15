@@ -413,7 +413,7 @@ export circuit initializeAdvancedPrenup(
     shieldedState.assetVault = Map::new();
     
     // Initialize ZK circuits
-    zkProofCircuit = initializeZKCircuit(zkVerificationKey);
+    zkProofCircuit = initializeZKCiruit(zkVerificationKey);
     
     emit ConfidentialEvent(
         PrenupInitialized,
